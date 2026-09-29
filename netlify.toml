@@ -1,0 +1,13 @@
+# Netlify 部署配置（Next.js 官方运行时 + Netlify Blobs 存储）
+# 详细说明见 README「部署」章节
+[build]
+  # Prisma client 生成：matches API 在非 Netlify 环境的回退分支依赖 @/lib/db，
+  # 打包期需要可解析的生成产物（Netlify 运行时走 Blobs 分支，不会执行 Prisma）
+  command = "prisma generate && next build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

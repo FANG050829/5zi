@@ -1,0 +1,77 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+local-*
+.claude
+*.log
+dev.log
+dev.out.log
+test
+prompt
+
+server.log
+
+# local database (SQLite)
+db/*.db
+*.db
+
+# local dev / testing artifacts
+tool-results/
+worklog.md
+download/
+
+# Skills directory
+/skills/
+
+# Netlify 本地状态与工具
+/.netlify/
+/.netlify-tools/
+
+# 本地临时测试目录
+/临时目录/
+
+# AI 工具本地配置（Netlify agent skills / ZCode）
+/.agents/
+/skills-lock.json
+/.zcodeignore
+/.zscripts/

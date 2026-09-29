@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240">
+  <title>黑白二子 · 太极</title>
+  <defs>
+    <radialGradient id="gB" cx="0.35" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#5a5f68"/>
+      <stop offset="0.45" stop-color="#272b31"/>
+      <stop offset="1" stop-color="#0a0c0f"/>
+    </radialGradient>
+    <radialGradient id="gW" cx="0.35" cy="0.3" r="0.85">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="0.55" stop-color="#eef0f3"/>
+      <stop offset="1" stop-color="#c3c9d1"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 上下气流弧（静止） -->
+  <path d="M254.5 74.1 A80 80 0 0 1 385.5 74.1" fill="none" stroke="#cfd5db" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 10"/>
+  <path d="M385.5 165.9 A80 80 0 0 1 254.5 165.9" fill="none" stroke="#565d66" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 10"/>
+
+  <!-- 太极本体（旋转） -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="0 320 120" to="360 320 120" dur="24s" repeatCount="indefinite"/>
+
+    <circle cx="320" cy="120" r="64" fill="none" stroke="#8a919b" stroke-opacity="0.3" stroke-width="1.5"/>
+
+    <!-- S 上段 · 白气流（绕黑子） -->
+    <path d="M320 56 A32 32 0 0 1 320 120" fill="none" stroke="#e8ebee" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="10 14">
+      <animate attributeName="stroke-dashoffset" from="0" to="-24" dur="1.5s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- S 下段 · 墨气流（绕白子） -->
+    <path d="M320 120 A32 32 0 0 0 320 184" fill="none" stroke="#565d66" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="10 14">
+      <animate attributeName="stroke-dashoffset" from="0" to="24" dur="1.5s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- 黑白二子（双鱼眼位） -->
+    <g transform="translate(320,88)">
+      <g>
+        <animateTransform attributeName="transform" type="scale" values="1;1.04;1" dur="6s" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" repeatCount="indefinite"/>
+        <circle r="15" fill="url(#gB)" stroke="#ffffff" stroke-opacity="0.13" stroke-width="1"/>
+        <ellipse cx="-4.6" cy="-6.2" rx="5.2" ry="3.2" fill="#ffffff" opacity="0.2" transform="rotate(-26)"/>
+      </g>
+    </g>
+    <g transform="translate(320,152)">
+      <g>
+        <animateTransform attributeName="transform" type="scale" values="1;1.04;1" dur="6s" begin="-3s" calcMode="spline" keySplines="0.4 0 0.6 1;0.4 0 0.6 1" repeatCount="indefinite"/>
+        <circle r="15" fill="url(#gW)" stroke="#41474f" stroke-opacity="0.28" stroke-width="1"/>
+        <ellipse cx="-4.6" cy="-6.6" rx="5" ry="3" fill="#ffffff" opacity="0.85" transform="rotate(-26)"/>
+      </g>
+    </g>
+  </g>
+</svg>

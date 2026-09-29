@@ -1,0 +1,286 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  /* focus 环统一为 stone-400（oklch） */
+  --ring: oklch(0.711 0.0104 56.26);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* ---------- 深色模式：stone 色阶整体反转（暖黑纸夜色） ----------
+   本项目组件直接使用 stone-* 工具类，这里在 .dark 下重映射整个色阶，
+   所有 text-stone-900 / bg-white / border-stone-200 等自动切换为夜色方案。 */
+.dark {
+  --color-white: #262320; /* 白色卡面 → 夜色卡面 */
+  --color-stone-50: #191715;
+  --color-stone-100: #221f1d;
+  --color-stone-200: #33302c;
+  --color-stone-300: #47433e;
+  --color-stone-400: #7a746c;
+  --color-stone-500: #948d84;
+  --color-stone-600: #b3aba1;
+  --color-stone-700: #cfc7bc;
+  --color-stone-800: #e4ddd3;
+  --color-stone-900: #f1ece4;
+  --color-stone-950: #faf7f2;
+}
+
+/* ---------- 棋盘配色（浅色宣纸 / 深色墨盘） ---------- */
+:root {
+  --board-bg: #fcfbf8;
+  --board-line: #d3cec4;
+  --board-edge: #b8b2a6;
+  --board-star: #b3ada1;
+  --board-coord: #c9c3b8;
+  --board-cross: #a8a29e;
+  --paper-vg2: #f6f3ea;
+  --paper-vg3: #ece8dc;
+  --paper-sheen-op: 0.35;
+  --stone-black-ring: rgba(0, 0, 0, 0); /* 浅色盘黑子无需描边 */
+  --ui-track: #f5f5f4; /* 战绩环底轨（stone-100） */
+  --ui-bar: #1c1917; /* 迷你条前景 */
+}
+.dark {
+  --board-bg: #2b2723;
+  --board-line: #4d4740;
+  --board-edge: #615a51;
+  --board-star: #665f57;
+  --board-coord: #57514a;
+  --board-cross: #736c64;
+  --paper-vg2: #302b27;
+  --paper-vg3: #36302b;
+  --paper-sheen-op: 0.05;
+  --stone-black-ring: rgba(241, 236, 228, 0.55);
+  --ui-track: #33302c;
+  --ui-bar: #e4ddd3;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ---------- 细滚动条：所有 overflow-y-auto 区域统一极细 stone 滚动条 ---------- */
+@layer utilities {
+  .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-stone-300) transparent;
+  }
+  .overflow-y-auto::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: var(--color-stone-300);
+    border-radius: 9999px;
+  }
+  .overflow-y-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+/* ---------- 座位卡活动方呼吸光效（中性黑 alpha，无彩色） ---------- */
+@keyframes seat-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 1px 6px rgba(28, 25, 23, 0.08),
+      0 0 0 0 rgba(28, 25, 23, 0.05);
+  }
+  50% {
+    box-shadow:
+      0 2px 12px rgba(28, 25, 23, 0.13),
+      0 0 0 4px rgba(28, 25, 23, 0.035);
+  }
+}
+.seat-active-glow {
+  animation: seat-breathe 2.6s ease-in-out infinite;
+}
+
+/* 深色模式：呼吸光效换成白色 alpha（墨盘上以微光勾勒活动方） */
+@keyframes seat-breathe-dark {
+  0%,
+  100% {
+    box-shadow:
+      0 1px 6px rgba(0, 0, 0, 0.35),
+      0 0 0 0 rgba(241, 236, 228, 0.04);
+  }
+  50% {
+    box-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.5),
+      0 0 0 4px rgba(241, 236, 228, 0.07);
+  }
+}
+.dark .seat-active-glow {
+  animation-name: seat-breathe-dark;
+}
+
+/* ---------- 聊天快捷短语 chips：hover 背景自左向右填充 ---------- */
+/* 快捷短语随对局阶段整体切换的轻淡入 */
+.quick-phase {
+  animation: quick-phase-in 0.28s ease both;
+}
+@keyframes quick-phase-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quick-phase {
+    animation: none;
+  }
+}
+
+.quick-chip {
+  background-image: linear-gradient(var(--color-stone-100), var(--color-stone-100));
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  background-position: left center;
+  transition:
+    background-size 0.25s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+.quick-chip:hover {
+  background-size: 100% 100%;
+  border-color: var(--color-stone-400);
+  color: var(--color-stone-900);
+}
+.quick-chip:active {
+  transform: scale(0.96);
+}
+
+/* 横屏对局：CSS 旋转兜底（iOS Safari / 微信 WKWebView 不支持 Fullscreen/Orientation Lock 时）。
+   rotate(90deg) 后 translateY(-100%) 把内容平移回视口内，宽高互换用 100vh/100vw（dvh/dvw 更佳）。 */
+.gomoku-landscape-css {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vh;
+  height: 100vw;
+  transform: rotate(90deg) translateY(-100%);
+  transform-origin: top left;
+}
+@supports (width: 100dvh) {
+  .gomoku-landscape-css {
+    width: 100dvh;
+    height: 100dvw;
+  }
+}

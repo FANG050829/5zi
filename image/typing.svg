@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 50" width="620" height="50" role="img" aria-label="五子 GOMOKU">
+  <style>
+    .t { fill: #8B949E; font-family: "Noto Sans SC", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 18px; font-weight: 500; letter-spacing: 0.02em; }
+  </style>
+
+  <!-- 四行轮流显示，完整周期 16s（每行显示 2.8s + 切换 1.2s = 4s） -->
+  <g>
+    <text class="t" x="310" y="32" text-anchor="middle">创建房间 · 一键邀请好友入座
+      <animate attributeName="opacity" values="0;1;1;0;0" keyTimes="0;0.01;0.175;0.25;1" dur="16s" repeatCount="indefinite"/>
+    </text>
+  </g>
+  <g>
+    <text class="t" x="310" y="32" text-anchor="middle">服务端权威判定 · 断线重连保护
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.25;0.26;0.425;0.5;1" dur="16s" repeatCount="indefinite"/>
+    </text>
+  </g>
+  <g>
+    <text class="t" x="310" y="32" text-anchor="middle">弈心 AI · 三档难度随时开局
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.5;0.51;0.675;0.75;1" dur="16s" repeatCount="indefinite"/>
+    </text>
+  </g>
+  <g>
+    <text class="t" x="310" y="32" text-anchor="middle">段位战绩 · 逐手复盘回放
+      <animate attributeName="opacity" values="0;0;1;1;0;1" keyTimes="0;0.75;0.76;0.925;1;1" dur="16s" repeatCount="indefinite"/>
+    </text>
+  </g>
+</svg>
