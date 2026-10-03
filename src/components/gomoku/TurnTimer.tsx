@@ -70,7 +70,7 @@ export function TurnTimer({
         />
       )}
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#e7e5e4" strokeWidth={3} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--ui-track)" strokeWidth={3} />
         <circle
           cx={size / 2}
           cy={size / 2}

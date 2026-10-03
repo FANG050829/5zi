@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Bot, BarChart3, Dices, Loader2, LogIn, Play, Plus, ScanLine, Settings2, Sprout, Target, Crown, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,6 +43,9 @@ interface MyMatch {
 
 const RANDOM_NAMES = ['棋客', '小茶', '阿白', '黑白之间', '落子无悔', '南山樵夫', '云手', '快棋手', '星位控', '先手党']
 
+/** 棋谚：大厅每次进入随机一句，纸墨世界的一点声音 */
+const PROVERBS = ['金角银边草肚皮', '棋逢对手 · 将遇良才', '一着不慎 · 满盘皆输', '观棋不语真君子', '落子无悔大丈夫', '宁失一子 · 不失一先']
+
 const noopSubscribe = () => () => {}
 
 // 大厅 AI 卡片展示（选中档案 id + 昵称）：源自 localStorage 外部存储，
@@ -78,6 +81,87 @@ function timeAgo(iso: string) {
   const h = Math.floor(m / 60)
   if (h < 24) return `${h} 小时前`
   return `${Math.floor(h / 24)} 天前`
+}
+
+const EASE_INK = [0.16, 1, 0.3, 1] as const
+
+/* ---------------- 大厅氛围层：巨幅虚位棋盘（仅桌面端） ----------------
+   15×15 淡线棋枰铺满画布，两枚「虚子」在星位间缓缓起落——
+   一盘没有人的棋，等谁来落第一手。 */
+const AMBIENT_GRID = 15
+const AMBIENT_CELL = 60
+const AMBIENT_SIZE = AMBIENT_GRID * AMBIENT_CELL
+const AMBIENT_MARGIN = AMBIENT_CELL / 2
+const GHOST_POINTS: Array<{ c: number; r: number; color: 1 | 2 }> = [
+  { c: 3, r: 4, color: 1 },
+  { c: 11, r: 3, color: 2 },
+  { c: 4, r: 11, color: 2 },
+  { c: 12, r: 10, color: 1 },
+  { c: 3, r: 9, color: 2 },
+  { c: 10, r: 12, color: 1 },
+]
+
+function AmbientBoard() {
+  const reduce = useReducedMotion()
+  const [gi, setGi] = useState(0)
+  useEffect(() => {
+    if (reduce) return
+    const t = setInterval(() => setGi((v) => v + 1), 4600)
+    return () => {
+      clearInterval(t)
+    }
+  }, [reduce])
+
+  const gp = GHOST_POINTS[gi % GHOST_POINTS.length]
+  const gx = AMBIENT_MARGIN + gp.c * AMBIENT_CELL
+  const gy = AMBIENT_MARGIN + gp.r * AMBIENT_CELL
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-0 hidden overflow-hidden md:block" aria-hidden>
+      <svg
+        className="ambient-grid absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[54%]"
+        width={AMBIENT_SIZE}
+        height={AMBIENT_SIZE}
+        viewBox={`0 0 ${AMBIENT_SIZE} ${AMBIENT_SIZE}`}
+        style={{
+          opacity: 0.5,
+          maskImage: 'radial-gradient(closest-side, black 50%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(closest-side, black 50%, transparent 100%)',
+        }}
+      >
+        {Array.from({ length: AMBIENT_GRID }, (_, i) => {
+          const p = AMBIENT_MARGIN + i * AMBIENT_CELL
+          const edge = i === 0 || i === AMBIENT_GRID - 1
+          return (
+            <g key={i} stroke="var(--board-line)" strokeWidth={edge ? 1.4 : 1}>
+              <line x1={AMBIENT_MARGIN} y1={p} x2={AMBIENT_SIZE - AMBIENT_MARGIN} y2={p} />
+              <line x1={p} y1={AMBIENT_MARGIN} x2={p} y2={AMBIENT_SIZE - AMBIENT_MARGIN} />
+            </g>
+          )
+        })}
+        {[[3, 3], [11, 3], [3, 11], [11, 11], [7, 7]].map(([r, c]) => (
+          <circle key={`s${r}-${c}`} cx={AMBIENT_MARGIN + c * AMBIENT_CELL} cy={AMBIENT_MARGIN + r * AMBIENT_CELL} r={4} fill="var(--board-star)" opacity={0.6} />
+        ))}
+        {/* 虚子：缓慢起落的幽灵落子 */}
+        <AnimatePresence mode="sync">
+          <motion.circle
+            key={`${gp.c}-${gp.r}-${gp.color}`}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 0.16, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 1.6, ease: 'easeInOut' }}
+            cx={gx}
+            cy={gy}
+            r={AMBIENT_CELL * 0.42}
+            fill={gp.color === 1 ? '#1c1917' : '#ffffff'}
+            stroke={gp.color === 2 ? '#b8b2a6' : 'none'}
+            strokeWidth={1}
+            style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+          />
+        </AnimatePresence>
+      </svg>
+    </div>
+  )
 }
 
 /** 房间预览卡（room:peek 结果：未入房即可见房主资料与房间状态） */
@@ -192,6 +276,9 @@ export function Lobby({
   const [myRank, setMyRank] = useState<RankInfo | null>(null)
   const nameRef = useRef<HTMLInputElement>(null)
   const codeRef = useRef<HTMLInputElement>(null)
+  const reduceMotion = useReducedMotion()
+  /** 今日棋谚：按 UTC 日期确定性选取（SSR 与水合结果一致，避免随机值水合冲突） */
+  const proverb = PROVERBS[Math.floor(Date.now() / 86400000) % PROVERBS.length]
 
   // 我的段位（回大厅时强刷缓存，确保刚结束的对局立即计入）
   useEffect(() => {
@@ -305,42 +392,71 @@ export function Lobby({
   }
 
   const canCreate = connected && name.trim().length > 0 && !busy
+  const still = reduceMotion ? false : undefined
 
   return (
-    <div className="relative mx-auto w-full max-w-md px-5 pb-10 pt-10 sm:pt-14">
+    <div className="relative mx-auto w-full max-w-md px-5 pb-10 pt-12 sm:pt-16">
+      <AmbientBoard />
+
       {/* 主题切换（右上角固定） */}
-      <div className="absolute right-5 top-5 sm:top-7">
+      <div className="absolute right-5 top-5 z-10 sm:top-7">
         <ThemeToggle />
       </div>
-      {/* 标题区 */}
+
+      {/* 标题区：双子落定 → 墨字浮现 → 棋谚 → 在线灯（减动效环境直接呈现） */}
       <motion.header
         className="mb-10 text-center"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        initial={reduceMotion ? false : 'hidden'}
+        animate="show"
       >
-        <div className="mb-5 flex items-center justify-center gap-3">
+        <div className="mb-6 flex items-center justify-center gap-3">
           <motion.span
             className="inline-flex"
-            animate={{ y: [0, -4, 0] }}
-            transition={{ repeat: Infinity, duration: 3.6, ease: 'easeInOut' }}
+            variants={{ hidden: { y: -26, opacity: 0 }, show: { y: 0, opacity: 1 } }}
+            transition={{ type: 'spring', stiffness: 300, damping: 16, delay: 0.04 }}
           >
             <StoneIcon color={1} size={26} />
           </motion.span>
-          <span className="h-px w-8 bg-stone-200" />
+          <motion.span
+            className="h-px w-10 bg-stone-200"
+            variants={{ hidden: { scaleX: 0 }, show: { scaleX: 1 } }}
+            transition={{ duration: 0.5, ease: EASE_INK, delay: 0.3 }}
+          />
           <motion.span
             className="inline-flex"
-            animate={{ y: [0, -3, 0] }}
-            transition={{ repeat: Infinity, duration: 3.6, ease: 'easeInOut', delay: 1.8 }}
+            variants={{ hidden: { y: 26, opacity: 0 }, show: { y: 0, opacity: 1 } }}
+            transition={{ type: 'spring', stiffness: 300, damping: 16, delay: 0.12 }}
           >
             <StoneIcon color={2} size={26} />
           </motion.span>
         </div>
-        <h1 className="text-5xl font-extralight tracking-[0.35em] text-stone-900 [text-indent:0.35em]">五子</h1>
-        <p className="mt-3 text-[11px] uppercase tracking-[0.4em] text-stone-400 [text-indent:0.4em]">Gomoku · 极简对弈</p>
+        <motion.h1
+          className="font-display text-6xl font-extralight tracking-[0.35em] text-stone-900 [text-indent:0.35em] sm:text-7xl"
+          variants={{ hidden: { opacity: 0, y: 12, filter: 'blur(8px)' }, show: { opacity: 1, y: 0, filter: 'blur(0px)' } }}
+          transition={{ duration: 0.9, ease: EASE_INK, delay: 0.2 }}
+        >
+          五子
+        </motion.h1>
+        <motion.p
+          className="mt-3.5 text-[11px] uppercase tracking-[0.4em] text-stone-400 [text-indent:0.4em]"
+          variants={{ hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.55, ease: EASE_INK, delay: 0.4 }}
+        >
+          Gomoku · 极简对弈
+        </motion.p>
+        <motion.p
+          className="mt-2 font-display text-[13px] tracking-[0.18em] text-stone-400"
+          variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }}
+          transition={{ duration: 0.7, ease: EASE_INK, delay: 0.52 }}
+          suppressHydrationWarning
+        >
+          「{proverb}」
+        </motion.p>
         {/* 在线人数（实时推送） */}
-        <div
+        <motion.div
           className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-stone-100 bg-white/70 px-3 py-1 text-[10px] text-stone-400"
+          variants={{ hidden: { opacity: 0, y: 4 }, show: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.5, ease: EASE_INK, delay: 0.62 }}
           aria-label={`当前 ${online} 人在线`}
         >
           <span className="relative flex h-1.5 w-1.5">
@@ -348,15 +464,15 @@ export function Lobby({
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
           </span>
           {online > 0 ? `${online} 人在线` : '连接中…'}
-        </div>
+        </motion.div>
       </motion.header>
 
       {/* 表单卡片 */}
       <motion.section
-        className="rounded-2xl border border-stone-200 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
-        initial={{ opacity: 0, y: 16 }}
+        className="relative z-10 rounded-2xl border border-stone-200 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_16px_40px_-24px_rgba(28,25,23,0.22)]"
+        initial={still ?? { opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.08 }}
+        transition={{ duration: 0.6, ease: EASE_INK, delay: 0.3 }}
       >
         <label className="mb-1.5 block text-xs font-medium text-stone-500" htmlFor="nickname">
           你的昵称
@@ -370,20 +486,20 @@ export function Lobby({
             onKeyDown={(e) => e.key === 'Enter' && (code ? handleJoin() : handleCreate())}
             placeholder="微信里朋友怎么叫你"
             maxLength={12}
-            className="h-11 rounded-xl border-stone-200 bg-stone-50/50 text-center text-base focus-visible:ring-stone-300"
+            className="h-11 rounded-xl border-stone-200 bg-stone-50/50 text-center text-base transition-shadow focus-visible:border-stone-400 focus-visible:ring-stone-300"
           />
           <Button
             variant="outline"
             size="icon"
             onClick={randomName}
             aria-label="随机昵称"
-            className="h-11 w-11 shrink-0 rounded-xl border-stone-200 text-stone-400 hover:text-stone-700"
+            className="h-11 w-11 shrink-0 rounded-xl border-stone-200 text-stone-400 transition-all duration-200 hover:-translate-y-px hover:border-stone-400 hover:text-stone-700 active:translate-y-0 active:scale-95"
           >
             <Dices className="h-4 w-4" />
           </Button>
         </div>
 
-        {/* 对局模式 */}
+        {/* 对局模式（滑块指示） */}
         <div className="mt-4 grid grid-cols-2 gap-1 rounded-xl bg-stone-100 p-1" role="radiogroup" aria-label="对局模式">
           {(
             [
@@ -396,14 +512,19 @@ export function Lobby({
               role="radio"
               aria-checked={mode === m.key}
               onClick={() => setMode(m.key)}
-              className={`flex h-10 items-center justify-center gap-1.5 rounded-lg text-[13px] transition-all duration-200 ${
-                mode === m.key
-                  ? 'bg-white text-stone-900 shadow-[0_1px_4px_rgba(28,25,23,0.1)]'
-                  : 'text-stone-400 hover:text-stone-600'
-              }`}
+              className="relative flex h-10 items-center justify-center gap-1.5 rounded-lg text-[13px] transition-colors duration-200"
             >
-              <m.icon className="h-3.5 w-3.5" />
-              {m.label}
+              {mode === m.key && (
+                <motion.span
+                  layoutId="lobby-mode-pill"
+                  className="absolute inset-0 rounded-lg bg-white shadow-[0_1px_4px_rgba(28,25,23,0.12)]"
+                  transition={{ type: 'spring', stiffness: 480, damping: 38 }}
+                />
+              )}
+              <span className={`relative z-10 flex items-center gap-1.5 ${mode === m.key ? 'text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}>
+                <m.icon className="h-3.5 w-3.5" />
+                {m.label}
+              </span>
             </button>
           ))}
         </div>
@@ -419,11 +540,7 @@ export function Lobby({
               transition={{ duration: 0.24, ease: 'easeOut' }}
               className="overflow-hidden"
             >
-              <div
-                className="mt-2.5 grid grid-cols-3 gap-1 rounded-xl bg-stone-100 p-1"
-                role="radiogroup"
-                aria-label="AI 难度"
-              >
+              <div className="mt-2.5 grid grid-cols-3 gap-1 rounded-xl bg-stone-100 p-1" role="radiogroup" aria-label="AI 难度">
                 {DIFFICULTY_OPTIONS.map((d) => {
                   const active = difficulty === d.key
                   return (
@@ -433,17 +550,20 @@ export function Lobby({
                       aria-checked={active}
                       title={d.hint}
                       onClick={() => setDifficulty(d.key)}
-                      className={`flex h-[52px] flex-col items-center justify-center gap-0.5 rounded-lg transition-all duration-200 ${
-                        active
-                          ? 'bg-white text-stone-900 shadow-[0_1px_4px_rgba(28,25,23,0.1)]'
-                          : 'text-stone-400 hover:text-stone-600'
-                      }`}
+                      className="relative flex h-[52px] flex-col items-center justify-center gap-0.5 rounded-lg transition-colors duration-200"
                     >
-                      <span className="flex items-center gap-1 text-[13px]">
+                      {active && (
+                        <motion.span
+                          layoutId="lobby-diff-pill"
+                          className="absolute inset-0 rounded-lg bg-white shadow-[0_1px_4px_rgba(28,25,23,0.12)]"
+                          transition={{ type: 'spring', stiffness: 480, damping: 38 }}
+                        />
+                      )}
+                      <span className={`relative z-10 flex items-center gap-1 text-[13px] ${active ? 'text-stone-900' : 'text-stone-400 hover:text-stone-600'}`}>
                         <d.icon className={`h-3.5 w-3.5 ${active ? 'text-amber-600' : ''}`} />
                         {d.label}
                       </span>
-                      <span className="text-[9px] leading-3 text-stone-400">{d.hint.split(' · ')[0]}</span>
+                      <span className="relative z-10 text-[9px] leading-3 text-stone-400">{d.hint.split(' · ')[0]}</span>
                     </button>
                   )
                 })}
@@ -489,11 +609,11 @@ export function Lobby({
         <Button
           onClick={handleCreate}
           disabled={!canCreate}
-          className="mt-3 h-12 w-full rounded-xl bg-stone-900 text-base font-normal tracking-wide text-white shadow-none transition-all duration-200 enabled:hover:-translate-y-0.5 enabled:hover:bg-stone-700 enabled:hover:shadow-[0_8px_20px_-8px_rgba(28,25,23,0.4)] active:translate-y-0 active:scale-[0.99] disabled:hover:translate-y-0"
+          className="group mt-3 h-12 w-full rounded-xl bg-stone-900 text-base font-normal tracking-wide text-white shadow-none transition-all duration-200 enabled:hover:-translate-y-0.5 enabled:hover:bg-stone-800 enabled:hover:shadow-[0_10px_24px_-10px_rgba(28,25,23,0.45)] active:translate-y-0 active:scale-[0.99] disabled:hover:translate-y-0"
         >
           {mode === 'pvp' ? (
             <>
-              <Plus className="mr-1.5 h-4 w-4" />
+              <Plus className="mr-1.5 h-4 w-4 transition-transform duration-200 group-enabled:group-hover:rotate-90" />
               创建房间 · 邀请微信好友
             </>
           ) : (
@@ -525,13 +645,13 @@ export function Lobby({
             placeholder="房号"
             inputMode="text"
             autoCapitalize="characters"
-            className="h-11 rounded-xl border-stone-200 bg-stone-50/50 text-center text-lg font-medium tracking-[0.5em] uppercase placeholder:tracking-normal focus-visible:ring-stone-300"
+            className="h-11 rounded-xl border-stone-200 bg-stone-50/50 text-center font-mono text-lg font-medium tracking-[0.5em] uppercase placeholder:font-sans placeholder:tracking-normal transition-shadow focus-visible:border-stone-400 focus-visible:ring-stone-300"
           />
           <Button
             onClick={handleJoin}
             disabled={!connected || code.trim().length < 4 || busy}
             variant="outline"
-            className="h-11 w-[72px] shrink-0 rounded-xl border-stone-300 text-stone-700 transition-all duration-200 enabled:hover:-translate-y-px enabled:hover:bg-stone-100 enabled:hover:shadow-[0_4px_12px_-6px_rgba(28,25,23,0.25)] active:translate-y-0 active:scale-[0.97]"
+            className="h-11 w-[72px] shrink-0 rounded-xl border-stone-300 text-stone-700 transition-all duration-200 enabled:hover:-translate-y-px enabled:hover:border-stone-500 enabled:hover:bg-stone-100 enabled:hover:shadow-[0_5px_14px_-6px_rgba(28,25,23,0.3)] active:translate-y-0 active:scale-[0.97]"
           >
             {peekState === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
           </Button>
@@ -554,17 +674,20 @@ export function Lobby({
         </AnimatePresence>
       </motion.section>
 
-      {/* 三步玩法 */}
+      {/* 三步玩法：去卡片化，一条细线串起三步 */}
       <motion.ol
-        className="mt-6 grid grid-cols-3 gap-2 text-center"
-        initial={{ opacity: 0 }}
+        className="mt-8 flex items-center justify-center gap-2.5"
+        initial={still ?? { opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
+        transition={{ duration: 0.6, ease: EASE_INK, delay: 0.5 }}
       >
-        {['填写昵称', '创建房间', '链接发给好友'].map((s, i) => (
-          <li key={s} className="rounded-xl border border-stone-100 bg-white/60 px-2 py-3">
-            <span className="mb-1 block text-[10px] text-stone-300">{['壹', '贰', '叁'][i]}</span>
-            <span className="text-xs text-stone-600">{s}</span>
+        {['填写昵称', '创建房间', '链接邀友'].map((s, i) => (
+          <li key={s} className="flex items-center gap-2.5">
+            <span className="flex items-baseline gap-1.5">
+              <span className="font-display text-[13px] text-stone-300">{['壹', '贰', '叁'][i]}</span>
+              <span className="text-[11px] tracking-wide text-stone-500">{s}</span>
+            </span>
+            {i < 2 && <span className="h-px w-5 bg-stone-200" aria-hidden />}
           </li>
         ))}
       </motion.ol>
@@ -572,13 +695,13 @@ export function Lobby({
       {/* 最近对局 */}
       <motion.section
         className="mt-10"
-        initial={{ opacity: 0 }}
+        initial={still ?? { opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
+        transition={{ duration: 0.6, ease: EASE_INK, delay: 0.62 }}
       >
         <div className="mb-3 flex items-center justify-between px-1">
-          <h2 className="flex items-center gap-1.5 text-xs font-medium tracking-widest text-stone-400">
-            <ScanLine className="h-3.5 w-3.5" />
+          <h2 className="flex items-center gap-1.5 font-display text-[13px] tracking-[0.2em] text-stone-500">
+            <ScanLine className="h-3.5 w-3.5 text-stone-400" />
             最近对局
           </h2>
           <div className="flex items-center gap-2">

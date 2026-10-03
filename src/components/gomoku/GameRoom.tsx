@@ -418,7 +418,18 @@ export function GameRoom({ gomoku }: { gomoku: GomokuApi }) {
             )}
           </div>
           <span className={`text-[10px] ${active ? 'text-stone-700' : 'text-stone-400'}`}>
-            {off ? '连接断开' : active ? '正在落子' : color === 1 ? '执黑' : '执白'}
+            {off ? (
+              '连接断开'
+            ) : active ? (
+              <span className="flex items-center gap-1.5">
+                <span className="h-1 w-1 animate-pulse rounded-full bg-stone-900" aria-hidden />
+                正在落子
+              </span>
+            ) : color === 1 ? (
+              '执黑'
+            ) : (
+              '执白'
+            )}
           </span>
         </div>
         {active && !off ? (
@@ -1027,12 +1038,12 @@ export function GameRoom({ gomoku }: { gomoku: GomokuApi }) {
                 className="flex flex-col items-center gap-2.5"
               >
                 <span
-                  className={`rounded-2xl border-[3px] px-6 py-2 backdrop-blur-[2px] ${
+                  className={`rounded-2xl border-[3px] px-6 py-2 font-display backdrop-blur-[2px] ${
                     rain.win ? 'border-rose-600/80 text-rose-600' : 'border-stone-800/75 text-stone-800'
                   }`}
                   style={{
                     fontSize: 64,
-                    fontWeight: 800,
+                    fontWeight: 300,
                     letterSpacing: '0.08em',
                     lineHeight: 1.05,
                     textShadow: '0 2px 18px rgba(28,25,23,0.18)',
@@ -1043,7 +1054,7 @@ export function GameRoom({ gomoku }: { gomoku: GomokuApi }) {
                   {rain.label}
                 </span>
                 <motion.span
-                  className="rounded-full bg-stone-900/85 px-3.5 py-1 text-[11px] tracking-[0.3em] text-stone-100"
+                  className="rounded-full bg-stone-900/85 px-3.5 py-1 font-display text-[12px] tracking-[0.3em] text-stone-100"
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.42 }}
@@ -1210,16 +1221,30 @@ function ResultDialog({
           <SheetTitle className="sr-only">对局结果</SheetTitle>
           <SheetDescription className="sr-only">本局胜负与双方比分，可选择换边再战或复盘棋局</SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col items-center gap-1 text-center">
-          <motion.span
+        <div className="flex flex-col items-center gap-2 text-center">
+          <motion.div
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.06 }}
-            className={`text-7xl font-extralight ${isDraw ? 'text-stone-500' : iWon ? 'text-stone-900' : 'text-stone-400'}`}
+            className="relative flex h-24 w-24 items-center justify-center"
           >
-            {big}
-          </motion.span>
-          <p className="mt-2 text-sm text-stone-700">
+            {/* 胜局：手工盖章式朱砂印环（椭圆微歪，似钤印而非几何圆） */}
+            {iWon && !isDraw && (
+              <motion.span
+                initial={{ scale: 1.5, opacity: 0, rotate: 4 }}
+                animate={{ scale: 1, opacity: 1, rotate: -7 }}
+                transition={{ delay: 0.22, type: 'spring', stiffness: 200, damping: 14 }}
+                className="absolute inset-0 rounded-[48%_52%_46%_54%/53%_47%_55%_45%] border-[2.5px] border-rose-600/75"
+                aria-hidden
+              />
+            )}
+            <span
+              className={`font-display text-6xl font-extralight ${isDraw ? 'text-stone-500' : iWon ? 'text-stone-900' : 'text-stone-400'}`}
+            >
+              {big}
+            </span>
+          </motion.div>
+          <p className="mt-1 text-sm text-stone-700">
             {isDraw
               ? '满盘皆子，握手言和'
               : `${room.winner === 1 ? '黑方' : '白方'} · ${winnerName ?? ''} 胜 · ${REASON_TEXT[room.endReason] ?? ''}`}

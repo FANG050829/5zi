@@ -112,8 +112,8 @@ export function WaitingRoom({ room, onLeave }: { room: RoomState; onLeave?: () =
       <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="mb-8 text-center">
           <p className="text-[11px] uppercase tracking-[0.4em] text-stone-400 [text-indent:0.4em]">房间已就绪</p>
-          <h1 className="mt-3 text-4xl font-extralight tracking-[0.45em] text-stone-900 [text-indent:0.45em]">{room.code}</h1>
-          <p className="mt-2 text-xs text-stone-400">
+          <h1 className="mt-3 font-display text-5xl font-extralight tracking-[0.4em] text-stone-900 [text-indent:0.4em]">{room.code}</h1>
+          <p className="mt-2.5 text-xs text-stone-400">
             {blackWaiting || whiteWaiting ? '把房号或二维码发给微信好友，加入后自动开局' : '双方就座，即将开局…'}
           </p>
         </div>
@@ -128,7 +128,12 @@ export function WaitingRoom({ room, onLeave }: { room: RoomState; onLeave?: () =
         {/* 二维码卡片 */}
         <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03),0_12px_32px_-16px_rgba(28,25,23,0.18)] transition-shadow duration-300">
           <div className="flex items-center justify-center">
-            <div className="rounded-xl border border-stone-100 bg-white p-3 shadow-[inset_0_0_0_1px_rgba(28,25,23,0.02)]">
+            {/* 取景框四角：似扫码取景，框住这枚等待被扫的局 */}
+            <div className="relative rounded-xl p-3">
+              <span className="absolute left-0 top-0 h-4 w-4 rounded-tl-md border-l-2 border-t-2 border-stone-300" aria-hidden />
+              <span className="absolute right-0 top-0 h-4 w-4 rounded-tr-md border-r-2 border-t-2 border-stone-300" aria-hidden />
+              <span className="absolute bottom-0 left-0 h-4 w-4 rounded-bl-md border-b-2 border-l-2 border-stone-300" aria-hidden />
+              <span className="absolute bottom-0 right-0 h-4 w-4 rounded-br-md border-b-2 border-r-2 border-stone-300" aria-hidden />
               {url ? (
                 <QRCodeSVG value={url} size={148} bgColor="#ffffff" fgColor="#1c1917" level="M" />
               ) : (

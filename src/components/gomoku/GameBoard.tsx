@@ -172,6 +172,17 @@ export function GameBoard({ board, myColor, interactive, winLine, lastMove, hint
             <stop offset="0%" stopColor="#ffffff" style={{ stopOpacity: 'var(--paper-sheen-op)' }} />
             <stop offset="18%" stopColor="#ffffff" stopOpacity="0" />
           </linearGradient>
+          {/* 墨子 / 白子：蛤壳式立体渐变，高光偏左上，暗部沉底 */}
+          <radialGradient id="stone-black" cx="0.36" cy="0.3" r="0.85">
+            <stop offset="0%" stopColor="var(--stone-black-hi)" />
+            <stop offset="38%" stopColor="#211e1b" />
+            <stop offset="100%" stopColor="var(--stone-black-lo)" />
+          </radialGradient>
+          <radialGradient id="stone-white" cx="0.36" cy="0.3" r="0.9">
+            <stop offset="0%" stopColor="var(--stone-white-hi)" />
+            <stop offset="55%" stopColor="#f7f3e9" />
+            <stop offset="100%" stopColor="var(--stone-white-lo)" />
+          </radialGradient>
         </defs>
 
         {/* 纸质感覆盖层 */}
@@ -193,6 +204,20 @@ export function GameBoard({ board, myColor, interactive, winLine, lastMove, hint
         {[[3, 3], [11, 3], [3, 11], [11, 11], [7, 7]].map(([r, c]) => (
           <circle key={`s${r}-${c}`} cx={M + c * G} cy={M + r * G} r={3.4} fill={STAR} />
         ))}
+
+        {/* 内框细线：与外沿形成双线工艺，如棋枰刻线 */}
+        <rect
+          x={M - 9}
+          y={M - 9}
+          width={VB - 2 * (M - 9)}
+          height={VB - 2 * (M - 9)}
+          rx={2}
+          fill="none"
+          stroke={EDGE}
+          strokeWidth={0.8}
+          opacity={0.45}
+          pointerEvents="none"
+        />
 
         {/* 坐标 */}
         {Array.from({ length: BOARD_SIZE }, (_, i) => (
@@ -220,8 +245,8 @@ export function GameBoard({ board, myColor, interactive, winLine, lastMove, hint
             cx={rc(hover).x}
             cy={rc(hover).y}
             r={R}
-            fill={myColor === 1 ? '#1c1917' : '#ffffff'}
-            stroke={myColor === 2 ? '#a8a29e' : 'none'}
+            fill={myColor === 1 ? 'url(#stone-black)' : 'url(#stone-white)'}
+            stroke={myColor === 2 ? 'var(--stone-white-edge)' : 'none'}
             strokeWidth={1}
             animate={{ opacity: [0.28, 0.46, 0.28], scale: [1, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
@@ -308,20 +333,20 @@ export function GameBoard({ board, myColor, interactive, winLine, lastMove, hint
                   cx={x}
                   cy={y}
                   r={R}
-                  fill="#1c1917"
+                  fill="url(#stone-black)"
                   stroke="var(--stone-black-ring)"
                   strokeWidth={1.4}
-                  style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.35))' }}
+                  style={{ filter: 'drop-shadow(0 1.5px 2px rgba(0,0,0,0.38))' }}
                 />
               ) : (
                 <circle
                   cx={x}
                   cy={y}
                   r={R}
-                  fill="#ffffff"
-                  stroke="#d6d0c6"
+                  fill="url(#stone-white)"
+                  stroke="var(--stone-white-edge)"
                   strokeWidth={1}
-                  style={{ filter: 'drop-shadow(0 1px 1.5px rgba(0,0,0,0.18))' }}
+                  style={{ filter: 'drop-shadow(0 1.5px 2px rgba(28,25,23,0.2))' }}
                 />
               )}
               {no !== undefined && (

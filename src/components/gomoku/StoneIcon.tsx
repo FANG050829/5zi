@@ -14,16 +14,25 @@ export function StoneIcon({ color, size = 20 }: { color: number; size?: number }
   }
   return color === 1 ? (
     <span
-      className="inline-block rounded-full bg-[#1c1917] shadow-[inset_0_-1px_2px_rgba(255,255,255,0.25),0_1px_2px_rgba(0,0,0,0.2)]"
-      style={{ width: size, height: size }}
+      className="inline-block rounded-full"
+      style={{
+        width: size,
+        height: size,
+        background: 'radial-gradient(circle at 36% 30%, #45403a 0%, #211e1b 42%, #100e0c 100%)',
+        boxShadow: 'inset 0 -1px 2px rgba(255,255,255,0.16), 0 1px 2px rgba(0,0,0,0.25)',
+      }}
       aria-hidden
     />
   ) : (
     <span
-      className="inline-block rounded-full border border-black/10 bg-[#fdfdfc] shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
-      style={{ width: size, height: size }}
+      className="inline-block rounded-full"
+      style={{
+        width: size,
+        height: size,
+        background: 'radial-gradient(circle at 36% 30%, #ffffff 0%, #f7f3e9 58%, #e4ddcd 100%)',
+        boxShadow: 'inset 0 0 0 1px rgba(28,25,23,0.08), 0 1px 2px rgba(28,25,23,0.16)',
+      }}
       aria-hidden
     />
   )
 }
-

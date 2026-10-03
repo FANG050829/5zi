@@ -8,6 +8,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* 展示字型：中文宋体（思源宋体），用于品牌大字 / 仪式字 / 小节题 */
+  --font-display: var(--font-noto-serif-sc), "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -41,6 +43,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  /* 动效缓动：墨落 expo-out——物体减速收势，不回弹 */
+  --ease-ink: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root {
@@ -146,7 +150,16 @@
   --paper-sheen-op: 0.35;
   --stone-black-ring: rgba(0, 0, 0, 0); /* 浅色盘黑子无需描边 */
   --ui-track: #f5f5f4; /* 战绩环底轨（stone-100） */
-  --ui-bar: #1c1917; /* 迷你条前景 */
+  --ui-bar: #1c1917; /* 迷你条前景 / 输入光标 */
+  /* 纸张材质：顶部天光 + 底部陈纸晕染（深色下几乎隐去） */
+  --paper-sky: rgba(255, 255, 255, 0.85);
+  --paper-deep: rgba(213, 204, 186, 0.32);
+  /* 墨色棋子立体感（棋盘 / 图标共用） */
+  --stone-black-hi: #45403a;
+  --stone-black-lo: #100e0c;
+  --stone-white-hi: #ffffff;
+  --stone-white-lo: #e4ddcd;
+  --stone-white-edge: #cfc8b9;
 }
 .dark {
   --board-bg: #2b2723;
@@ -161,14 +174,43 @@
   --stone-black-ring: rgba(241, 236, 228, 0.55);
   --ui-track: #33302c;
   --ui-bar: #e4ddd3;
+  --paper-sky: rgba(255, 255, 255, 0.02);
+  --paper-deep: rgba(0, 0, 0, 0.3);
+  --stone-black-hi: #4c4740;
+  --stone-black-lo: #0e0c0a;
+  --stone-white-hi: #f6f1e6;
+  --stone-white-lo: #cdc5b4;
+  --stone-white-edge: #8a8377;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
   body {
     @apply bg-background text-foreground;
+    /* 宣纸材质：天光自顶部洒下，底部微微陈旧，避免大面积纯白的塑料感 */
+    background-image:
+      radial-gradient(120% 70% at 50% -10%, var(--paper-sky) 0%, transparent 62%),
+      radial-gradient(130% 60% at 50% 112%, var(--paper-deep) 0%, transparent 58%);
+    background-attachment: fixed;
+  }
+  input,
+  textarea {
+    caret-color: var(--ui-bar);
+  }
+  /* 选区同样出自纸墨世界：反白即墨，反墨即纸 */
+  ::selection {
+    background: var(--color-stone-900);
+    color: var(--color-stone-50);
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
   }
 }
 
@@ -242,11 +284,6 @@
     transform: translateY(0);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .quick-phase {
-    animation: none;
-  }
-}
 
 .quick-chip {
   background-image: linear-gradient(var(--color-stone-100), var(--color-stone-100));
@@ -265,6 +302,36 @@
 }
 .quick-chip:active {
   transform: scale(0.96);
+}
+
+/* ---------- 减动效：仅停装饰性循环动画，功能过渡保留 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .quick-phase {
+    animation: none;
+  }
+  .seat-active-glow,
+  .animate-ping,
+  .animate-pulse {
+    animation: none !important;
+  }
+}
+
+/* ---------- 大厅背景：巨幅虚位棋盘（几何线稿，桌面端氛围层） ---------- */
+.ambient-grid {
+  animation: ambient-drift 26s ease-in-out infinite alternate;
+}
+@keyframes ambient-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ambient-grid {
+    animation: none;
+  }
 }
 
 /* 横屏对局：CSS 旋转兜底（iOS Safari / 微信 WKWebView 不支持 Fullscreen/Orientation Lock 时）。

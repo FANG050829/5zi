@@ -85,15 +85,16 @@
 
 ### 体验细节
 
+- **视觉语言**：宣纸 × 墨的纸墨世界——思源宋体（Noto Serif SC）展示字型、大厅「虚位棋盘」氛围层与每日棋谚、编排式入场动效；胜局以「钤印」仪式呈现（朱砂印环 + 宋体盖章 + 表情雨），棋子为蛤壳式立体渐变
 - **横屏模式**：桌面原生全屏 + 屏幕方向锁；iOS Safari / 微信 WKWebView 下 CSS 伪横屏兜底
-- 深浅色主题、WebAudio 合成音效（落子 / 胜负 / 提示）、键盘方向键 + 回车落子
-- OG 分享卡片、PWA manifest、移动端深度适配
+- 深浅色主题（浅色宣纸 / 深色墨盘双套材质）、WebAudio 合成音效（落子 / 胜负 / 提示）、键盘方向键 + 回车落子
+- OG 分享卡片、PWA manifest、移动端深度适配、全局错误兜底页
 
 ## 技术栈
 
 | 层 | 技术 |
 | --- | --- |
-| 前端 | Next.js 16（App Router）· React 19 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui · framer-motion · qrcode.react |
+| 前端 | Next.js 16（App Router）· React 19 · TypeScript 5 · Tailwind CSS 4 · shadcn/ui · framer-motion · qrcode.react · Noto Serif SC（展示宋体） |
 | 实时对战 | Next.js API 路由 + 轮询（Serverless 友好，权威逻辑在 `src/server/gomoku`） |
 | 数据持久化 | Netlify Blobs（Serverless 部署）· Prisma 6 + SQLite（本地/自托管） |
 | 遗留自托管 | Node + Socket.IO 4（Bun 运行，`mini-services/gomoku-server`，需 Caddy 网关） |
@@ -224,6 +225,7 @@ vercel --prod
 │   │   └── match-store.ts        # 战绩存储（Prisma / Netlify Blobs 双后端）
 │   ├── app/
 │   │   ├── page.tsx              # 单路由入口（大厅）
+│   │   ├── global-error.tsx      # 根级错误兜底（纸墨风错误页）
 │   │   └── api/
 │   │       ├── gomoku/           # 对战轮询 + 动作 API（建房/落子/悔棋/聊天/AI测试）
 │   │       ├── matches/          # 对局落库、查询、交锋、热力图
@@ -256,6 +258,7 @@ vercel --prod
 
 - `engine-bench.mjs` / `ai-hard-check.mjs` / `streak-difficulty-check.mjs` — AI 引擎强度与连胜难度基准
 - `eval-check.mjs` / `hint-check.mjs` / `rank-check.mjs` — 评估曲线 / 提示 / 段位校验
+- `reaction-presence-check.mjs` / `r7-spectate-rain.mjs` — 表情弹幕 / 观战与在线心跳回归（现行轮询协议）
 - `pvp-regress.mjs` — PVP 房间流程回归（旧协议）
 - `gomoku-bot.mjs` / `line-bot.mjs` — 自动对弈机器人（旧协议）
 

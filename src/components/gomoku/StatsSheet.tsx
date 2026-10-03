@@ -641,7 +641,7 @@ export function StatsSheet({
         </SheetHeader>
 
         <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="flex shrink-0 items-center gap-1.5 text-sm font-medium tracking-widest text-stone-700">
+          <h2 className="flex shrink-0 items-center gap-1.5 font-display text-[15px] tracking-[0.25em] text-stone-700">
             <TrendingUp className="h-4 w-4 text-stone-400" />
             战绩中心
           </h2>
